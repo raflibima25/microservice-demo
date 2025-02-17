@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package product;
+option go_package = "github.com/raflibima25/microservice-demo/grpc/pb/product";
+
+service ProductService {
+    rpc CreateProduct(CreateProductRequest) returns (Product);
+    rpc GetProduct(GetProductRequest) returns (Product);
+    rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+    rpc UpdateProduct(UpdateProductRequest) returns (Product);
+    rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
+}
+
+message Product {
+    uint64 id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
+    int32 stock = 5;
+    string created_at = 6;
+    string updated_at = 7;
+}
+
+message CreateProductRequest {
+    string name = 1;
+    string description = 2;
+    double price = 3;
+    int32 stock = 4;
+}
+
+message GetProductRequest {
+    uint64 id = 1;
+}
+
+message ListProductsRequest {
+    int32 page = 1;
+    int32 per_page = 2;
+    string search = 3;
+}
+
+message ListProductsResponse {
+    repeated Product products = 1;
+    int32 total = 2;
+    int32 page = 3;
+    int32 per_page = 4;
+    int32 total_pages = 5;
+}
+
+message UpdateProductRequest {
+    uint64 id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
+    int32 stock = 5;
+}
+
+message DeleteProductRequest {
+    uint64 id = 1;
+}
+
+message DeleteProductResponse {
+    bool success = 1;
+}

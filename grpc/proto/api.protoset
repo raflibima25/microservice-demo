@@ -1,0 +1,79 @@
+
+Ë
+auth/auth.protoauth"_
+RegisterRequest
+username (	Rusername
+email (	Remail
+password (	Rpassword"F
+LoginRequest
+username (	Rusername
+password (	Rpassword"H
+AuthResponse
+token (	Rtoken"
+user (2.auth.UserDataRuser"L
+UserData
+id (Rid
+username (	Rusername
+email (	Remail"'
+ValidateRequest
+token (	Rtoken"L
+ValidateResponse
+valid (Rvalid"
+user (2.auth.UserDataRuser"%
+LogoutRequest
+token (	Rtoken"*
+LogoutResponse
+success (Rsuccess2å
+AuthService5
+Register.auth.RegisterRequest.auth.AuthResponse/
+Login.auth.LoginRequest.auth.AuthResponse9
+Validate.auth.ValidateRequest.auth.ValidateResponse3
+Logout.auth.LogoutRequest.auth.LogoutResponseB7Z5github.com/raflibima25/microservice-demo/grpc/pb/authbproto3
+›
+
+product/product.protoproduct"¹
+Product
+id (Rid
+name (	Rname 
+description (	Rdescription
+price (Rprice
+stock (Rstock
+
+created_at (	R	createdAt
+
+updated_at (	R	updatedAt"x
+CreateProductRequest
+name (	Rname 
+description (	Rdescription
+price (Rprice
+stock (Rstock"#
+GetProductRequest
+id (Rid"[
+ListProductRequest
+page (Rpage
+per_page (RperPage
+search (	Rsearch"©
+ListProductResponse,
+products (2.product.ProductRproducts
+total (Rtotal
+page (Rpage
+per_page (RperPage
+total_pages (R
+totalPages"ˆ
+UpdateProductRequest
+id (Rid
+name (	Rname 
+description (	Rdescription
+price (Rprice
+stock (Rstock"&
+DeleteProductRequest
+id (Rid"1
+DeleteProductResponse
+success (Rsuccess2ê
+ProductService@
+CreateProduct.product.CreateProductRequest.product.Product:
+
+GetProduct.product.GetProductRequest.product.ProductH
+ListProduct.product.ListProductRequest.product.ListProductResponse@
+UpdateProduct.product.UpdateProductRequest.product.ProductN
+DeleteProduct.product.DeleteProductRequest.product.DeleteProductResponseB:Z8github.com/raflibima25/microservice-demo/grpc/pb/productbproto3
