@@ -4,6 +4,8 @@ import (
 	"auth-service/internal/domain"
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -38,7 +40,7 @@ func (s *jwtTokenService) GenerateToken(userID uint64) (string, error) {
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString([]byte(s.secretKey))
 	if err != nil {
 		return "", err
@@ -70,8 +72,13 @@ func (s *jwtTokenService) ValidateToken(tokenString string) (uint64, error) {
 }
 
 func (s *jwtTokenService) BlacklistToken(token string) error {
-	ctx := context.Background()
+	// if Redis is not available, assume success
+	if s.redisClient == nil {
+		log.Println("Warning: Redis not available, token blacklisting skipped")
+		return nil
+	}
 
+	ctx := context.Background()
 	// store token in redis with expiration time
 	err := s.redisClient.Set(ctx,
 		"blacklist:"+token,
@@ -79,10 +86,20 @@ func (s *jwtTokenService) BlacklistToken(token string) error {
 		s.tokenDuration,
 	).Err()
 
-	return err
+	if err != nil {
+		log.Printf("Error blacklisting token: %v", err)
+		return fmt.Errorf("failed to blacklist token: %v", err)
+	}
+
+	return nil
 }
 
 func (s *jwtTokenService) IsTokenBlacklisted(token string) bool {
+	if s.redisClient == nil {
+		// if Redis is not available, assume token is valid
+		return false
+	}
+
 	ctx := context.Background()
 
 	exists, _ := s.redisClient.Exists(ctx, "blacklist:"+token).Result()

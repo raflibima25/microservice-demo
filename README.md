@@ -45,3 +45,17 @@ make run-product
 ```
 make run-frontend
 ```
+
+## Import GRPC
+
+```
+go mod edit -require=grpc@v0.0.0
+go mod edit -replace=grpc=../grpc
+go mod tidy
+```
+
+## Install and run redis on windows
+
+```
+https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-windows/
+```

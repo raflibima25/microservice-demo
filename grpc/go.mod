@@ -1,4 +1,4 @@
-module github.com/raflibima25/microservice-demo.git/grpc
+module grpc
 
 go 1.23.4
 

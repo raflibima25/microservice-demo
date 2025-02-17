@@ -25,7 +25,7 @@ type registerRequest struct {
 }
 
 type loginRequest struct {
-	Username string `json:"username" binding:"required,"`
+	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -93,7 +93,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "logout success"})
+	c.JSON(http.StatusOK, gin.H{"message": "successfully logged out"})
 }
 
 func (h *AuthHandler) Me(c *gin.Context) {
