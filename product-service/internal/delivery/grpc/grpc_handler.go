@@ -50,12 +50,16 @@ func (h *GRPCProductHandler) ListProducts(ctx context.Context, req *pb.ListProdu
 		protoProducts[i] = convertToProtoProduct(&product)
 	}
 
-	return &pb.ListProductsResponse{
-		Products:   protoProducts,
+	meta := &pb.Meta{
 		Total:      int32(total),
 		Page:       req.Page,
 		PerPage:    req.PerPage,
 		TotalPages: int32((total + int64(req.PerPage) - 1) / int64(req.PerPage)),
+	}
+
+	return &pb.ListProductsResponse{
+		Products: protoProducts,
+		Meta:     meta,
 	}, nil
 }
 

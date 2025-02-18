@@ -26,6 +26,16 @@ const Navbar: React.FC = () => {
                                 MyApp
                             </Link>
                         </div>
+                        {user && (
+                            <div className="ml-6 flex items-center space-x-4">
+                                <Link to="/dashboard" className="text-gray-700 hover:text-indigo-600">
+                                    Dashboard
+                                </Link>
+                                <Link to="/products" className="text-gray-700 hover:text-indigo-600">
+                                    Products
+                                </Link>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex items-center">
