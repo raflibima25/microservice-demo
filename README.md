@@ -46,6 +46,12 @@ make run-product
 make run-frontend
 ```
 
+## Terminal 4 - API Gateway
+
+```
+make run-api-gateway
+```
+
 ## Import GRPC
 
 ```
