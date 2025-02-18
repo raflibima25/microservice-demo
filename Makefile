@@ -30,3 +30,6 @@ run-product:
 
 run-frontend:
 	cd frontend && npm run start
+
+run-api-gateway:
+	cd api-gateway && go run main.go

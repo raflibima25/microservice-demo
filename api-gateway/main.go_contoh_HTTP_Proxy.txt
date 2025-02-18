@@ -1,0 +1,124 @@
+package contoh
+
+import (
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+
+	"github.com/gin-gonic/gin"
+)
+
+type ServiceConfig struct {
+	Name     string
+	BaseURL  string
+	NeedAuth bool
+}
+
+func NewProxy(targetURL string, stripPrefix string) (*httputil.ReverseProxy, error) {
+	target, err := url.Parse(targetURL)
+	if err != nil {
+		return nil, err
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(target)
+
+	proxy.Director = func(req *http.Request) {
+		req.URL.Scheme = target.Scheme
+		req.URL.Host = target.Host
+
+		if req.URL.Path == stripPrefix {
+			req.URL.Path = stripPrefix + "/"
+		}
+
+		log.Printf("Forwarding request to: %s%s", targetURL, req.URL.Path)
+	}
+
+	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+		log.Printf("Proxy error: %v", err)
+		w.WriteHeader(http.StatusBadGateway)
+		w.Write([]byte("Service unavailable"))
+	}
+
+	return proxy, nil
+}
+
+func ProxyHandler(proxy *httputil.ReverseProxy) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		proxy.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.GetHeader("Authorization")
+		if token == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		c.Next()
+	}
+}
+
+func main() {
+	r := gin.Default()
+
+	// add CORS middleware
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(200)
+			return
+		}
+
+		c.Next()
+	})
+
+	// service configurations
+	services := []ServiceConfig{
+		{
+			Name:     "auth",
+			BaseURL:  "http://localhost:8080",
+			NeedAuth: false,
+		},
+		{
+			Name:     "products",
+			BaseURL:  "http://localhost:8081",
+			NeedAuth: true,
+		},
+	}
+
+	// configure routes for each service
+	for _, service := range services {
+		prefix := "/" + service.Name
+		proxy, err := NewProxy(service.BaseURL, prefix)
+		if err != nil {
+			log.Fatalf("Failed to create proxy for %s: %v", service.Name, err)
+		}
+
+		group := r.Group(prefix)
+
+		if service.NeedAuth {
+			group.Use(AuthMiddleware())
+		}
+
+		// add logging middleware
+		group.Use(func(c *gin.Context) {
+			log.Printf("Incoming request: %s %s", c.Request.Method, c.Request.URL.Path)
+			c.Next()
+		})
+
+		// handle all paths under this group
+		group.Any("/*path", ProxyHandler(proxy))
+	}
+
+	// start server
+	port := ":8000"
+	log.Printf("API Gateway starting on %s", port)
+	if err := r.Run(port); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
+}

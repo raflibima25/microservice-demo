@@ -1,15 +1,20 @@
 package http
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"product-service/internal/domain"
 	"strconv"
+
+	authpb "grpc/pb/auth"
 
 	"github.com/gin-gonic/gin"
 )
 
 type ProductHandler struct {
 	productUseCase domain.ProductUseCase
+	authClient     authpb.AuthServiceClient
 }
 
 func NewProductHandler(productUseCase domain.ProductUseCase) *ProductHandler {
@@ -143,4 +148,15 @@ func (h *ProductHandler) RegisterRoutes(router *gin.Engine) {
 		products.PUT("/:id", h.Update)
 		products.DELETE("/:id", h.Delete)
 	}
+}
+
+func (h *ProductHandler) validateToken(token string) error {
+	resp, err := h.authClient.Validate(context.Background(), &authpb.ValidateRequest{
+		Token: token,
+	})
+	if err != nil || !resp.Valid {
+		return errors.New("invalid token")
+	}
+
+	return nil
 }
